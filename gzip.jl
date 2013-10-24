@@ -83,7 +83,7 @@ function Base.read(file::IO, ::Type{GzipMetadata})
         fname = ASCIIString(readuntil(file, 0x00)[1:end-1])
     end
     if has_comment(header.flags)
-        fname = ASCIIString(readuntil(file, 0x00)[1:end-1])
+        fcomment = ASCIIString(readuntil(file, 0x00)[1:end-1])
     end
     if has_crc(header.flags)
         crc16 = read(file, Uint16)
