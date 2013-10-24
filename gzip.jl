@@ -92,7 +92,7 @@ function Base.read(file::IO, ::Type{GzipMetadata})
 end
 
 
-function make_bitvector(n::Uint8)
+function Base.convert(::Type{BitVector}, n::Uint8)
     bits = BitVector(8)
     for i=1:8
         bits[i] = n & 0x1
@@ -105,8 +105,7 @@ function read_bits(stream::BitStream, n)
     cached_bits = stream.bv
     while n > length(cached_bits)
         byte = read(stream.stream, Uint8)
-        new_bits = make_bitvector(byte)
-        cached_bits = vcat(cached_bits, new_bits)
+        cached_bits = vcat(cached_bits, convert(BitVector, byte))
     end
     stream.bv = cached_bits[n+1:end]
     return cached_bits[1:n]
