@@ -296,11 +296,8 @@ end
 
 function copy_text!(decoded_text, distance, len)
     j = length(decoded_text) - distance + 1
-    i = length(decoded_text) + 1
-    append!(decoded_text, zeros(Uint8, len))
     while len > 0
-        decoded_text[i] = decoded_text[j]
-        i += 1
+        push!(decoded_text, decoded_text[j])
         j += 1
         len -= 1
     end
