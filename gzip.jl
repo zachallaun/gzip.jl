@@ -101,6 +101,14 @@ function Base.convert(::Type{BitVector}, n::Uint8)
     return bits
 end
 
+function Base.convert(::Type{Uint8}, bv::BitVector)
+    num = 0x00
+    for i=1:length(bv)
+        num = (num << 1) + bv[i]
+    end
+    return num
+end
+
 function read_bits(stream::BitStream, n)
     cached_bits = stream.bv
     while n > length(cached_bits)
@@ -113,21 +121,13 @@ end
 
 function read_bits_inv(bs::BitStream, n)
     bits = reverse!(read_bits(bs, n))
-    return make_int(bits)
-end
-
-function make_int(bv::BitVector)
-    num = 0x00
-    for i=1:length(bv)
-        num = (num << 1) + bv[i]
-    end
-    return num
+    return convert(Uint8, bits)
 end
 
 function read_huffman_stream(stream)
-    n_lit  = make_int(read_bits(stream, 5))
-    n_dist = make_int(read_bits(stream, 5))
-    n_len  = make_int(read_bits(stream, 4))
+    n_lit  = uint8(read_bits(stream, 5))
+    n_dist = uint8(read_bits(stream, 5))
+    n_len  = uint8(read_bits(stream, 4))
     return (n_lit, n_dist, n_len)
 end
 
