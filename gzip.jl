@@ -36,8 +36,8 @@ type HuffmanHeader
 end
 
 Base.read(bs::BitStream, ::Type{HuffmanHeader}) = HuffmanHeader(
-    convert(Uint8, read_bits_inv(bs, 5)), 
-    convert(Uint8, read_bits_inv(bs, 5)), 
+    convert(Uint8, read_bits_inv(bs, 5)),
+    convert(Uint8, read_bits_inv(bs, 5)),
     convert(Uint8, read_bits_inv(bs, 4)))
 
 
@@ -201,13 +201,13 @@ function add_item!(root::InternalNode, label, code::BitVector)
         return
     end
     if root[code[1]] != EmptyNode()
-        add_item!(root[code[1]], label, code[2:end]) 
+        add_item!(root[code[1]], label, code[2:end])
         return
     end
     child = InternalNode()
     root[code[1]] = child
     add_item!(child, label, code[2:end])
-    
+
 end
 function create_huffman_tree(code_table)
     root = InternalNode()
@@ -329,18 +329,18 @@ end
 
 function inflate_block!(decoded_text, bs::BitStream)
     head = read(bs, HuffmanHeader)
-    
+
     first_tree = read_first_tree(bs, head.hclen)
     codes = read_second_tree_codes(bs, head, first_tree)
-    
+
     literal_codes = codes[1:257 + head.hlit]
     lit_code_table = create_code_table(literal_codes, [0:length(literal_codes)-1])
     literal_tree = create_huffman_tree(lit_code_table)
-    
+
     distance_codes = codes[end-head.hdist:end]
     dist_code_table = create_code_table(distance_codes, [0:length(distance_codes)-1])
     distance_tree = create_huffman_tree(dist_code_table)
-    
+
     return inflate_block!(decoded_text, bs, literal_tree, distance_tree)
 end
 
