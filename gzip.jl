@@ -188,7 +188,7 @@ function Base.setindex!(node::InternalNode, value::Node, dir::Bool)
 end
 Base.getindex(node::InternalNode, dir::Integer) = bool(dir) ? node.one : node.zero
 function Base.getindex(node::InternalNode, code)
-    for (i, bit) = enumerate(code)
+    for bit in code
         node = node[bit]
     end
     return node.label
