@@ -167,25 +167,23 @@ end
 
 abstract Node
 
-type InternalNode <: Node
+immutable InternalNode <: Node
     one::Node
     zero::Node
 end
 
-type EmptyNode <:Node end
+immutable EmptyNode <:Node end
 
-type LeafNode <:Node
+immutable LeafNode <:Node
     label
 end
 
 InternalNode() = InternalNode(EmptyNode(), EmptyNode())
-function Base.setindex!(node::InternalNode, value::Node, dir::Bool)
-    if dir == 0
-        node.zero = value
-    else
-        node.one = value
-    end
+
+function set(node::InternalNode, dir::Bool, value::Node)
+    dir ? InternalNode(value, node.zero) : InternalNode(node.one, value)
 end
+
 Base.getindex(node::InternalNode, dir::Integer) = bool(dir) ? node.one : node.zero
 function Base.getindex(node::InternalNode, code)
     for bit in code
@@ -194,24 +192,19 @@ function Base.getindex(node::InternalNode, code)
     return node.label
 end
 
-function add_item!(root::InternalNode, label, code::BitVector)
+addcode(mt::EmptyNode, label, code::BitVector) = addcode(InternalNode(), label, code)
+function addcode(node::InternalNode, label, code::BitVector)
     if length(code) == 1
-        root[code[1]] = LeafNode(label)
-        return
+        set(node, code[1], LeafNode(label))
+    else
+        set(node, code[1], addcode(node[code[1]], label, code[2:]))
     end
-    if root[code[1]] != EmptyNode()
-        add_item!(root[code[1]], label, code[2:end])
-        return
-    end
-    child = InternalNode()
-    root[code[1]] = child
-    add_item!(child, label, code[2:end])
-
 end
+
 function create_huffman_tree(code_table)
     root = InternalNode()
     for (label, codes) = code_table
-        add_item!(root, label, codes)
+        root = addcode(root, label, codes)
     end
     return root
 end
